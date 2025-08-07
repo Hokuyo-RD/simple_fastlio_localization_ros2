@@ -7,6 +7,13 @@ from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 
 def launch_setup(context, *args, **kwargs):
+    # YAMLファイルからパラメータを読み込むためのパス
+    # get_package_share_directory を使ってパッケージの共有ディレクトリを取得し、
+    # その中に YAML ファイルを配置するのが一般的です。
+    package_share_directory = get_package_share_directory('simple_fastlio_localization')
+    param_file_path = os.path.join(package_share_directory, 'config', 'localization_params.yaml')
+
+    # launchファイルで定義された引数を取得 (YAMLからの値を上書きするため)
     map_file = LaunchConfiguration('map_file').perform(context)
     initial_pose = LaunchConfiguration('initial_pose').perform(context)
     frames_accumulate = LaunchConfiguration('frames_accumulate').perform(context)
@@ -16,11 +23,14 @@ def launch_setup(context, *args, **kwargs):
     visualize_registration_result = LaunchConfiguration('visualize_registration_result').perform(context)
     enable_sound = LaunchConfiguration('enable_sound').perform(context)
 
-    # Topic remapping configurations
+    # トピックリマッピングの引数を取得
     odom_topic = LaunchConfiguration('odom_topic').perform(context)
     cloud_odom_topic = LaunchConfiguration('cloud_odom_topic').perform(context)
     pose_topic = LaunchConfiguration('pose_topic').perform(context)
     map_topic = LaunchConfiguration('map_topic').perform(context)
+
+    # initial_pose の文字列をリストに変換
+    # initial_pose_list = [float(x) for x in initial_pose_str.split()] if initial_pose_str else []
 
     return [
         Node(
@@ -28,16 +38,19 @@ def launch_setup(context, *args, **kwargs):
             executable='localization_node',
             name='localization_node',
             output='screen',
-            parameters=[{
-                'map_file': map_file,
-                'initial_pose': initial_pose,
-                'frames_accumulate': int(frames_accumulate),
-                'min_registration_distance': float(min_registration_distance),
-                'asynchronous_registration': async_registration.lower() == 'true',
-                'publish_2d_pose': publish_2d_pose.lower() == 'true',
-                'visualize_registration_result': visualize_registration_result.lower() == 'true',
-                'enable_sound': enable_sound.lower() == 'true',
-            }],
+            parameters=[
+                param_file_path, # YAMLファイルからのデフォルトパラメータを読み込む
+                {
+                    # launchファイルの引数で指定された値でYAMLからの値を上書き
+                    'map_file': map_file,
+                    'initial_pose': initial_pose,
+                    'frames_accumulate': int(frames_accumulate),
+                    'min_registration_distance': float(min_registration_distance),
+                    'asynchronous_registration': async_registration.lower() == 'true',
+                    'publish_2d_pose': publish_2d_pose.lower() == 'true',
+                    'visualize_registration_result': visualize_registration_result.lower() == 'true',
+                    'enable_sound': enable_sound.lower() == 'true',
+                }],
             remappings=[
                 ('/Odometry', odom_topic),
                 ('/cloud_registered', cloud_odom_topic),
@@ -53,9 +66,9 @@ def generate_launch_description():
 
     return LaunchDescription([
         DeclareLaunchArgument('map_file', default_value='', description='Path to the map file'),
-        DeclareLaunchArgument('initial_pose', default_value='0.0 0.0 0.0 0.0 0.0 0.0 1.0', description='Initial pose'),
+        DeclareLaunchArgument('initial_pose', default_value='0.0 0.0 0.0 0.0 0.0 0.0 1.0', description='Initial pose as a string: "x y z roll pitch yaw w"'),
         DeclareLaunchArgument('frames_accumulate', default_value='1', description='No. of frames accumulate for matching'),
-        DeclareLaunchArgument('min_registration_distance', default_value='0', description='Minimum distance for registration'),
+        DeclareLaunchArgument('min_registration_distance', default_value='0.0', description='Minimum distance for registration'),
         DeclareLaunchArgument('async_registration', default_value='true', description='Async registration'),
         DeclareLaunchArgument('publish_2d_pose', default_value='false', description='Publish 2D pose as /map -> /odom transform'),
         DeclareLaunchArgument('visualize_registration_result', default_value='false', description='Visualize registration result with color coding'),
@@ -84,4 +97,3 @@ def generate_launch_description():
             ]
         )
     ])
-

@@ -1,0 +1,27 @@
+<?xml version='1.0' ?>
+<launch>
+    <arg name="package_share_directory" default="$(find-pkg-share simple_fastlio_localization)"/>
+    <arg name="config_dir" default="$(var package_share_directory)/config"/>
+    <arg name="rviz_dir" default="$(var package_share_directory)/rviz"/>
+
+    <arg name="param_file_path" default="$(var config_dir)/localization_params.yaml"/>
+
+    <arg name="rviz" default="true" description="Launch Rviz"/>
+    <arg name="rviz_config" default="$(var rviz_dir)/loc.rviz" description="Path to the RViz config file"/>
+
+    <arg name="odom_topic" default="/Odometry" description="Odometry topic name"/>
+    <arg name="cloud_odom_topic" default="/cloud_registered" description="Odometry frame cloud topic name"/>
+    <arg name="pose_topic" default="/estimated_pose" description="Estimated pose output topic name"/>
+    <arg name="map_topic" default="/map_cloud" description="Map cloud output topic name"/>
+
+    <node pkg="rviz2" exec="rviz2" name="rviz" output="screen" if="$(var rviz)" args="-d $(var rviz_config)"/>
+
+    <node pkg="simple_fastlio_localization" exec="localization_node" name="localization_node" output="screen">
+        <param from="$(var param_file_path)"/>
+
+        <remap from="/Odometry" to="$(var odom_topic)"/>
+        <remap from="/cloud_registered" to="$(var cloud_odom_topic)"/>
+        <remap from="/estimated_pose" to="$(var pose_topic)"/>
+        <remap from="/map_cloud" to="$(var map_topic)"/>
+    </node>
+</launch>

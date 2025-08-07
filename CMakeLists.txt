@@ -50,7 +50,7 @@ if(BUILD_TESTING)
 endif()
 
 install(
-  DIRECTORY launch rviz sounds
+  DIRECTORY launch rviz sounds config
   DESTINATION share/${PROJECT_NAME}
 )
 
