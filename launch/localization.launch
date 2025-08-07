@@ -1,0 +1,42 @@
+<?xml version='1.0' ?>
+<launch>
+    <arg name="package_share_directory" default="$(find-pkg-share simple_fastlio_localization)"/>
+    <arg name="config_dir" default="$(var package_share_directory)/config"/>
+    <arg name="rviz_dir" default="$(var package_share_directory)/rviz"/>
+
+    <arg name="param_file_path" default="$(var config_dir)/localization_params.yaml"/>
+
+    <arg name="map_file" default="/home/hokuyo/colcon_ws/src/hokuyo_navigation2/map/toyonaka.pcd" description="Path to the map file"/>
+    <arg name="initial_pose" default="0 0 0 0 0 0.9839859 -0.1782461" description='Initial pose as a string: "x y z qx qy qz qw"'/>
+    <arg name="frames_accumulate" default="4" description="No. of frames accumulate for matching"/>
+    <arg name="min_registration_distance" default="0.0" description="Minimum distance for registration"/>
+    <arg name="async_registration" default="true" description="Async registration"/>
+    <arg name="publish_2d_pose" default="true" description="Publish 2D pose as /map -> /odom transform"/>
+    <arg name="visualize_registration_result" default="true" description="Visualize registration result with color coding"/>
+    <arg name="enable_sound" default="true" description="Enable sound notification for registration results"/>
+    <arg name="rviz" default="true" description="Launch Rviz"/>
+    <arg name="rviz_config" default="$(var rviz_dir)/loc.rviz" description="Path to the RViz config file"/>
+
+    <arg name="odom_topic" default="/hokuyo_lio/lidar_odom" description="Odometry topic name"/>
+    <arg name="cloud_odom_topic" default="/hokuyo_lio/aligned_scan_points" description="Odometry frame cloud topic name"/>
+    <arg name="pose_topic" default="/estimated_pose" description="Estimated pose output topic name"/>
+    <arg name="map_topic" default="/map_cloud" description="Map cloud output topic name"/>
+
+    <node pkg="rviz2" exec="rviz2" name="rviz" output="screen" if="$(var rviz)" args="-d $(var rviz_config)"/>
+
+    <node pkg="simple_fastlio_localization" exec="localization_node" name="localization_node" output="screen">
+        <param from="$(var param_file_path)"/> <param name="map_file" value="$(var map_file)"/>
+        <param name="initial_pose" value="$(var initial_pose)"/>
+        <param name="frames_accumulate" value="$(var frames_accumulate)"/>
+        <param name="min_registration_distance" value="$(var min_registration_distance)"/>
+        <param name="asynchronous_registration" value="$(var async_registration)"/>
+        <param name="publish_2d_pose" value="$(var publish_2d_pose)"/>
+        <param name="visualize_registration_result" value="$(var visualize_registration_result)"/>
+        <param name="enable_sound" value="$(var enable_sound)"/>
+
+        <remap from="/Odometry" to="$(var odom_topic)"/>
+        <remap from="/cloud_registered" to="$(var cloud_odom_topic)"/>
+        <remap from="/estimated_pose" to="$(var pose_topic)"/>
+        <remap from="/map_cloud" to="$(var map_topic)"/>
+    </node>
+</launch>
