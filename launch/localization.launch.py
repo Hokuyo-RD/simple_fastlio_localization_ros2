@@ -66,20 +66,21 @@ def generate_launch_description():
     default_rviz_config_path = os.path.join(package_path, 'rviz', 'loc.rviz')
 
     return LaunchDescription([
-        DeclareLaunchArgument('map_file', default_value='', description='Path to the map file'),
-        DeclareLaunchArgument('initial_pose', default_value='0.0 0.0 0.0 0.0 0.0 0.0 1.0', description='Initial pose as a string: "x y z roll pitch yaw w"'),
+        DeclareLaunchArgument('map_file', default_value='/home/colcon_ws/src/hokuyo_navigation2/map/expo_ros2.pcd', description='Path to the map file'),
+        # DeclareLaunchArgument('initial_pose', default_value='-1.002715729700867 0.21954120489681372 -0.23875123379999508 0.0162312792 0.0129877045 0.6142911386 0.7995398734', description='Initial pose as a string: "x y z roll pitch yaw w"'),
+        DeclareLaunchArgument('initial_pose', default_value='0.0 0.0 0.0 0.0162312792 0.0129877045 0.7142911386 0.6995398734', description='Initial pose as a string: "x y z roll pitch yaw w"'),
         DeclareLaunchArgument('frames_accumulate', default_value='1', description='No. of frames accumulate for matching'),
         DeclareLaunchArgument('min_registration_distance', default_value='0.0', description='Minimum distance for registration'),
         DeclareLaunchArgument('async_registration', default_value='true', description='Async registration'),
         DeclareLaunchArgument('publish_2d_pose', default_value='false', description='Publish 2D pose as /map -> /odom transform'),
         DeclareLaunchArgument('visualize_registration_result', default_value='false', description='Visualize registration result with color coding'),
-        DeclareLaunchArgument('enable_sound', default_value='false', description='Enable sound notification for registration results'),
-        DeclareLaunchArgument('enable_lio_only_update', default_value='false', description='Update self-pose on receiving lio without pointcloud registration'),
+        DeclareLaunchArgument('enable_sound', default_value='true', description='Enable sound notification for registration results'),
+        DeclareLaunchArgument('enable_lio_only_update', default_value='true', description='Update self-pose on receiving lio without pointcloud registration'),
         DeclareLaunchArgument('rviz', default_value='true', description='Launch Rviz'),
         DeclareLaunchArgument('rviz_config', default_value=default_rviz_config_path, description='Path to the RViz config file'),
 
-        DeclareLaunchArgument('odom_topic', default_value='/Odometry', description='Odometry topic name'),
-        DeclareLaunchArgument('cloud_odom_topic', default_value='/cloud_registered', description='Odometry frame cloud topic name'),
+        DeclareLaunchArgument('odom_topic', default_value='/hokuyo_lio/lidar_odom', description='Odometry topic name'),
+        DeclareLaunchArgument('cloud_odom_topic', default_value='/hokuyo_lio/aligned_scan_points', description='Odometry frame cloud topic name'),
         DeclareLaunchArgument('pose_topic', default_value='/estimated_pose', description='Estimated pose output topic name'),
         DeclareLaunchArgument('map_topic', default_value='/map_cloud', description='Map cloud output topic name'),
 
